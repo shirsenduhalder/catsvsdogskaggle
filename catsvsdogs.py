@@ -95,8 +95,8 @@ Y = [i[1] for i in train]
 test_x = np.array([i[0] for i in test]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
 test_y = [i[1] for i in test]
 
-# model.fit({'input': X}, {'targets': Y}, n_epoch=3, validation_set=({'input': test_x}, {'targets': test_y}), 
-#     snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
+model.fit({'input': X}, {'targets': Y}, n_epoch=3, validation_set=({'input': test_x}, {'targets': test_y}), 
+    snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
 model.save(MODEL_NAME)
 
 import matplotlib.pyplot as plt 
@@ -124,3 +124,15 @@ for num,data in enumerate(test_data[:12]):
 	y.axes.get_yaxis().set_visible(False)
 
 plt.show()
+
+with open('final_file.csv','w') as f:
+	f.write('id,label\n')
+
+with open('final_file.csv','a') as f:
+	for data in tqdm(test_data):
+		img_num = data[1]
+		img_data = data[0]
+		orig = img_data
+		data = img_data.reshape(IMG_SIZE,IMG_SIZE,1)
+		model_out = model.predict([data])[0]
+		f.write('{},{}\n'.format(img_num,model_out[1]))
