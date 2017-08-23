@@ -57,8 +57,6 @@ from tflearn.layers.estimator import regression
 import tensorflow as tf
 tf.reset_default_graph()
 
-import tensorflow as tf
-tf.reset_default_graph()
 convnet = input_data(shape=[None, IMG_SIZE, IMG_SIZE, 1], name='input')
 
 convnet = conv_2d(convnet, 32, 5, activation='relu')
@@ -84,8 +82,6 @@ convnet = regression(convnet, optimizer='adam', learning_rate=LR, loss='categori
 
 model = tflearn.DNN(convnet, tensorboard_dir='log')
 
-
-
 if os.path.exists('{}.meta'.format(MODEL_NAME)):
     model.load(MODEL_NAME)
     print('model loaded!')
@@ -99,6 +95,32 @@ Y = [i[1] for i in train]
 test_x = np.array([i[0] for i in test]).reshape(-1,IMG_SIZE,IMG_SIZE,1)
 test_y = [i[1] for i in test]
 
-model.fit({'input': X}, {'targets': Y}, n_epoch=3, validation_set=({'input': test_x}, {'targets': test_y}), 
-    snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
+# model.fit({'input': X}, {'targets': Y}, n_epoch=3, validation_set=({'input': test_x}, {'targets': test_y}), 
+#     snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
 model.save(MODEL_NAME)
+
+import matplotlib.pyplot as plt 
+test_data = np.load('test_data.npy')
+
+fig = plt.figure()
+
+for num,data in enumerate(test_data[:12]):
+	img_num = data[1]
+	img_data = data[0]
+
+	y = fig.add_subplot(3,4,num+1)
+	orig = img_data
+	data = img_data.reshape(IMG_SIZE,IMG_SIZE,1)
+	model_out = model.predict([data])[0]
+
+	if np.argmax(model_out) == 1:
+		str_label='Dog'
+	else:
+		str_label='Cat'
+
+	y.imshow(orig,cmap='gray')
+	plt.title(str_label)
+	y.axes.get_xaxis().set_visible(False)
+	y.axes.get_yaxis().set_visible(False)
+
+plt.show()
